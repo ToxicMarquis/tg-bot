@@ -1,15 +1,14 @@
 meta:
-  environment: python
+  environment: docker
   toolchain:
-    name: pip
-    version: "3.11"
+    name: docker
 build:
-  requirementsPath: requirements.txt
-  commands:
-    - pip install --no-cache-dir -r requirements.txt
+  dockerfile: Dockerfile
+  skip: false
 run:
-  scriptName: main.py
+  image: null
   command: null
+  args: null
   persistenceMount: /data
   containerPort: "80"
   servicePort: "80"
