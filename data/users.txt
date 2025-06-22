@@ -1,3 +1,0 @@
-telegram_id,lichess_username,registration_date,last_activity,notification_enabled
-1834341648,ModerMark,2025-06-19 13:00:00,2025-06-21 13:50:53,True
-6336367547,Fear_no_fails,2025-06-21 14:12:08,2025-06-21 14:23:38,True
