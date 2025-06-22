@@ -12,34 +12,32 @@ def register_dev_handlers(bot, chess_bot):
 
     import os
 
-@bot.message_handler(commands=['show_tokens'])
-def show_tokens_command(message):
-    """Показать действующие токены (только для разработчика)"""
-    # Замените на ваш реальный developer_id, если он отличается
-    developer_id = 1834341648
-    if message.from_user.id != developer_id:
-        bot.reply_to(message, "❌ Нет доступа.")
-        return
+    @bot.message_handler(commands=['show_tokens'])
+    def show_tokens_command(message):
+        """Показать действующие токены (только для разработчика)"""
+        developer_id = 1834341648
+        if message.from_user.id != developer_id:
+            bot.reply_to(message, "❌ Нет доступа.")
+            return
 
-    bot_token = os.getenv('BOT_TOKEN', 'Нет BOT_TOKEN')
-    lichess_token = os.getenv('LICHESS_TOKEN', 'Нет LICHESS_TOKEN')
+        bot_token = os.getenv('BOT_TOKEN', 'Нет BOT_TOKEN')
+        lichess_token = os.getenv('LICHESS_TOKEN', 'Нет LICHESS_TOKEN')
 
-    # Для безопасности показываем только начало и конец токена
-    def mask(token):
-        if token and len(token) > 10:
-            return token[:4] + "..." + token[-4:]
-        return token
+        def mask(token):
+            if token and len(token) > 10:
+                return token[:4] + "..." + token[-4:]
+            return token
 
-    reply = (
-        f"🤖 <b>Тестовые токены окружения:</b>\n"
-        f"Telegram BOT_TOKEN: <code>{mask(bot_token)}</code>\n"
-        f"Lichess LICHESS_TOKEN: <code>{mask(lichess_token)}</code>"
-    )
-    try:
-        bot.send_message(message.chat.id, reply, parse_mode="HTML")
-    except Exception as e:
-            logger.error(f"Ошибка в developer_menu: {e}")
-            bot.reply_to(message, "❌ Произошла ошибка.")
+        reply = (
+            f"🤖 <b>Тестовые токены окружения:</b>\n"
+            f"Telegram BOT_TOKEN: <code>{mask(bot_token)}</code>\n"
+            f"Lichess LICHESS_TOKEN: <code>{mask(lichess_token)}</code>"
+        )
+        try:
+            bot.send_message(message.chat.id, reply, parse_mode="HTML")
+        except Exception as e:
+                logger.error(f"Ошибка в developer_menu: {e}")
+                bot.reply_to(message, "❌ Произошла ошибка.")
 
     @bot.message_handler(commands=['dev'])
     def developer_menu(message):
