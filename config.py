@@ -8,8 +8,8 @@ class Config:
     """Центральная конфигурация приложения"""
 
     # Токены API
-    BOT_TOKEN = os.environ.get('BOT_TOKEN')
-    LICHESS_TOKEN = os.environ.get('LICHESS_TOKEN')
+    BOT_TOKEN = os.getenv('BOT_TOKEN')
+    LICHESS_TOKEN = os.getenv('LICHESS_TOKEN')
 
     # ID разработчика
     DEVELOPER_ID = 1834341648
