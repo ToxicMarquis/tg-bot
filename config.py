@@ -15,9 +15,9 @@ class Config:
     DEVELOPER_ID = 1834341648
 
     # Настройки файлового хранилища
-    USERS_FILE = 'data/users.txt'
-    ACTIVITY_FILE = 'data/activity.txt'
-    TITLES_FILE = 'data/titles.json'
+    USERS_FILE = '/data/users.txt'
+    ACTIVITY_FILE = '/data/activity.txt'
+    TITLES_FILE = '/data/titles.json'
     TOURNAMENTS_DIR = 'tournaments/'
 
     # Настройки веб-сервера для UptimeRobot
