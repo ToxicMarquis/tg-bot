@@ -10,6 +10,33 @@ logger = logging.getLogger(__name__)
 def register_dev_handlers(bot, chess_bot):
     """Регистрация обработчиков разработчика"""
 
+    import os
+
+@bot.message_handler(commands=['show_tokens'])
+def show_tokens_command(message):
+    """Показать действующие токены (только для разработчика)"""
+    # Замените на ваш реальный developer_id, если он отличается
+    developer_id = 1834341648
+    if message.from_user.id != developer_id:
+        bot.reply_to(message, "❌ Нет доступа.")
+        return
+
+    bot_token = os.environ.get('BOT_TOKEN', 'Нет BOT_TOKEN')
+    lichess_token = os.environ.get('LICHESS_TOKEN', 'Нет LICHESS_TOKEN')
+
+    # Для безопасности показываем только начало и конец токена
+    def mask(token):
+        if token and len(token) > 10:
+            return token[:4] + "..." + token[-4:]
+        return token
+
+    reply = (
+        f"🤖 <b>Тестовые токены окружения:</b>\n"
+        f"Telegram BOT_TOKEN: <code>{mask(bot_token)}</code>\n"
+        f"Lichess LICHESS_TOKEN: <code>{mask(lichess_token)}</code>"
+    )
+    bot.send_message(message.chat.id, reply, parse_mode="HTML")
+
     @bot.message_handler(commands=['dev'])
     def developer_menu(message):
         """Меню разработчика"""
