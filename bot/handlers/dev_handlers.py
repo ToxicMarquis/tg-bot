@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 def register_dev_handlers(bot, chess_bot):
     """Регистрация обработчиков разработчика"""
-
     @bot.message_handler(commands=['dev'])
     def developer_menu(message):
         """Меню разработчика"""
