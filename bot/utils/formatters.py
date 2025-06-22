@@ -32,7 +32,7 @@ class MessageFormatter:
         """Приветствие для зарегистрированных пользователей"""
         return f"""🏁 С возвращением в шахматный бот!
 
-Ваш аккаунт: **{username}**
+Ваш аккаунт: **{escape_markdown_v2(username)}**
 
 Доступные функции:
 • 👤 Просматривать свой профиль
@@ -84,7 +84,7 @@ class MessageFormatter:
 
     def format_registration_success(self, username: str) -> str:
         """Сообщение об успешной регистрации"""
-        return f"""✅ Успешная регистрация! Ваш Lichess ник: **{username}**
+        return f"""✅ Успешная регистрация! Ваш Lichess ник: **{escape_markdown_v2(username)}**
 
 Теперь вы можете использовать команду /profile для просмотра своего профиля."""
     
@@ -110,7 +110,7 @@ class MessageFormatter:
         }
 
         message = f"""
-    👤 **{title}{username}**
+    👤 **{title}{escape_markdown_v2(username)}**
 
     📊 **Рейтинги Lichess**
 
@@ -159,7 +159,7 @@ class MessageFormatter:
         tv_hours = round(tv_time / 3600, 1) if tv_time else 0
 
         message = f"""
-    🎮 **{username}**
+    🎮 **{escape_markdown_v2(username)}**
 
     📈 **Общая статистика игр**
 
@@ -182,7 +182,7 @@ class MessageFormatter:
 
 Вы собираетесь удалить свой аккаунт из системы.
 
-**Текущий аккаунт:** {username}
+**Текущий аккаунт:** {escape_markdown_v2(username)}
 
 После удаления:
 • Вся ваша информация будет стерта
@@ -195,7 +195,7 @@ class MessageFormatter:
         """Сообщение об успешном выходе"""
         return f"""✅ **Аккаунт успешно удален**
 
-Ваш аккаунт **{username}** был удален из системы.
+Ваш аккаунт **{escape_markdown_v2(username)}** был удален из системы.
 
 Спасибо за использование нашего бота! 
 Вы можете зарегистрироваться заново в любое время командой /register"""
