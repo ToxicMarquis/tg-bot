@@ -5,12 +5,12 @@ from threading import Thread
 from telebot import types
 from telebot.apihelper import ApiTelegramException
 
+import os
+
 logger = logging.getLogger(__name__)
 
 def register_dev_handlers(bot, chess_bot):
     """Регистрация обработчиков разработчика"""
-
-    import os
 
     @bot.message_handler(commands=['show_tokens'])
     def show_tokens_command(message):
