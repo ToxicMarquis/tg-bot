@@ -21,8 +21,8 @@ def show_tokens_command(message):
         bot.reply_to(message, "❌ Нет доступа.")
         return
 
-    bot_token = os.environ.get('BOT_TOKEN', 'Нет BOT_TOKEN')
-    lichess_token = os.environ.get('LICHESS_TOKEN', 'Нет LICHESS_TOKEN')
+    bot_token = os.getenv('BOT_TOKEN', 'Нет BOT_TOKEN')
+    lichess_token = os.getenv('LICHESS_TOKEN', 'Нет LICHESS_TOKEN')
 
     # Для безопасности показываем только начало и конец токена
     def mask(token):
@@ -35,7 +35,11 @@ def show_tokens_command(message):
         f"Telegram BOT_TOKEN: <code>{mask(bot_token)}</code>\n"
         f"Lichess LICHESS_TOKEN: <code>{mask(lichess_token)}</code>"
     )
-    bot.send_message(message.chat.id, reply, parse_mode="HTML")
+    try:
+        bot.send_message(message.chat.id, reply, parse_mode="HTML")
+    except Exception as e:
+            logger.error(f"Ошибка в developer_menu: {e}")
+            bot.reply_to(message, "❌ Произошла ошибка.")
 
     @bot.message_handler(commands=['dev'])
     def developer_menu(message):
