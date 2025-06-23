@@ -16,7 +16,7 @@ def register_user_handlers(bot, chess_bot):
             if existing_user:
                 bot.reply_to(
                     message,
-                    f"✅ Вы уже зарегистрированы с ником: **{existing_user}**",
+                    f"✅ Вы уже зарегистрированы с ником: **{escape_markdown_v2(existing_user)}**",
                     parse_mode='Markdown'
                 )
                 return
