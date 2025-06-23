@@ -3,6 +3,13 @@ from telebot import types
 
 logger = logging.getLogger(__name__)
 
+def escape_markdown_v2(text: str) -> str:
+    """Экранирование спецсимволов для MarkdownV2"""
+    if not text:
+        return ""
+    escape_chars = r'_*[]()~`>#+=|{}.!'
+    return re.sub(r'([{}])'.format(re.escape(escape_chars)), r'\\\1', str(text))
+
 def register_user_handlers(bot, chess_bot):
     """Регистрация пользовательских обработчиков"""
 
