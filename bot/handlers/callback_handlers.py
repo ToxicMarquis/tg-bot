@@ -72,8 +72,13 @@ def register_callback_handlers(bot, chess_bot):
         try:
             # Парсим данные из callback
             data_parts = call.data.split('_')
-            username = data_parts[2]
-            page = int(data_parts[3])
+
+            if len(data_parts) >= 4:
+                page = int(data_parts[2])
+                username = '_'.join(data_parts[3:])  # На случай если в никнейме есть подчеркивания
+            else:
+                page = 1
+                username = chess_bot.file_storage.get_user_from_file(call.from_user.id)
 
             # Проверяем права доступа
             user_id = call.from_user.id
