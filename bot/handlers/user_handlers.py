@@ -283,9 +283,9 @@ def register_user_handlers(bot, chess_bot):
         # Создаем быстрое меню выбора страницы
         markup = types.InlineKeyboardMarkup()
         markup.add(
-            types.InlineKeyboardButton("📊 Рейтинги", callback_data=f"profile_page_{username}_1"),
-            types.InlineKeyboardButton("🎮 Игры", callback_data=f"profile_page_{username}_2"),
-            types.InlineKeyboardButton("🏆 Турниры", callback_data=f"profile_page_{username}_3")
+            types.InlineKeyboardButton("📊 Рейтинги", callback_data=f"profile_page_1_{username}"),
+            types.InlineKeyboardButton("🎮 Игры", callback_data=f"profile_page_2_{username}"),
+            types.InlineKeyboardButton("🏆 Турниры", callback_data=f"profile_page_3_{username}")
         )
 
         bot.reply_to(
