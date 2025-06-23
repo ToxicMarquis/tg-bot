@@ -109,7 +109,7 @@ def register_user_handlers(bot, chess_bot):
         loading_message = bot.reply_to(message, "⏳ Загружаю данные профиля...", parse_mode='Markdown')
 
         # Получаем первую страницу профиля
-        profile_text, keyboard = chess_bot.show_profile_page(username, 1)
+        profile_text, keyboard = chess_bot.show_profile_page(user_id, username, 1)
 
         try:
             bot.delete_message(chat_id=message.chat.id, message_id=loading_message.message_id)
