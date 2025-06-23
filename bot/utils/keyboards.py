@@ -63,7 +63,7 @@ class KeyboardManager:
         if current_page > 1:
             buttons.append(types.InlineKeyboardButton(
                 "◀️", 
-                callback_data=f"profile_page_{username}_{current_page-1}"
+                callback_data=f"profile_page_{current_page-1}_{username}"
             ))
 
         # Индикатор текущей страницы
@@ -76,7 +76,7 @@ class KeyboardManager:
         if current_page < 3:
             buttons.append(types.InlineKeyboardButton(
                 "▶️", 
-                callback_data=f"profile_page_{username}_{current_page+1}"
+                callback_data=f"profile_page_{current_page+1}_{username}"
             ))
 
         markup.add(*buttons)
@@ -96,7 +96,7 @@ class KeyboardManager:
             else:
                 quick_nav.append(types.InlineKeyboardButton(
                     f"{page_icons[i-1]} {page_names[i-1]}", 
-                    callback_data=f"profile_page_{username}_{i}"
+                    callback_data=f"profile_page_{i}_{username}"
                 ))
 
         markup.add(*quick_nav)
