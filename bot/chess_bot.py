@@ -59,7 +59,7 @@ class ChessBot:
             logger.error(f"Ошибка регистрации обработчиков: {e}")
             raise
 
-    def show_profile_page(self, username: str, page: int = 1) -> tuple:
+    def show_profile_page(self, user_id: int, username: str, page: int = 1) -> tuple:
         """Отображение определенной страницы профиля"""
         # Загрузка данных
         titles_data = self.file_storage.load_titles_from_file()
@@ -80,7 +80,7 @@ class ChessBot:
             message = "❌ Неверный номер страницы"
             page = 1
 
-        keyboard = self.keyboards.get_profile_page_keyboard(page, username)
+        keyboard = self.keyboards.get_profile_page_keyboard(page, username, user_id)
         return message, keyboard
 
     
