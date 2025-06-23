@@ -159,67 +159,6 @@ def register_user_handlers(bot, chess_bot):
             logger.error(f"Ошибка в logout_command: {e}")
             bot.reply_to(message, "❌ Произошла ошибка.")
 
-    @bot.message_handler(commands=['unistats'])
-    def team_stats_command(message):
-        """Детальная статистика команды (только для администратора)"""
-        user_id = message.from_user.id
-
-        # Проверяем, является ли пользователь администратором команды
-        if user_id != 1834341648:  # ID разработчика
-            bot.reply_to(message, "❌ У вас нет доступа к этой команде.")
-            return
-
-        try:
-            tournament_data = chess_bot.tournament_service.load_tournament_csv_data()
-
-            if tournament_data.empty:
-                bot.reply_to(message, "❌ Нет турнирных данных")
-                return
-
-            # Фильтруем по команде
-            team_data = tournament_data[
-                tournament_data['team'].str.lower().str.contains('unicorn7love', na=False)
-            ]
-
-            if team_data.empty:
-                bot.reply_to(message, "❌ Данные команды не найдены")
-                return
-
-            # Детальная статистика
-            total_players = team_data['username'].nunique()
-            total_tournaments = team_data['tournament_date'].nunique()
-            total_points = team_data['score'].sum()
-            avg_points_per_player = round(total_points / total_players, 1)
-
-            # Топ турниры по участию
-            tournament_participation = team_data.groupby('tournament_date').size().sort_values(ascending=False)
-
-            stats_message = f"""📊 **Детальная статистика команды Unicorn7Love Fun Club**
-
-    👥 **Общая информация:**
-    • Всего игроков: {total_players}
-    • Всего турниров: {total_tournaments}
-    • Общие очки команды: {total_points}
-    • Средние очки на игрока: {avg_points_per_player}
-
-    🏆 **Топ турниры по участию:**"""
-
-            for tournament, participants in tournament_participation.head(5).items():
-                stats_message += f"\n    • {tournament}: {participants} участник(а/ов)"
-
-            # Активность игроков
-            player_activity = team_data.groupby('username').size().sort_values(ascending=False)
-            stats_message += f"\n\n    🎯 **Самые активные игроки:**"
-
-            for player, tournaments in player_activity.head(5).items():
-                stats_message += f"\n    • {player}: {tournaments} турнир(а/ов)"
-
-            bot.reply_to(message, stats_message, parse_mode='Markdown')
-
-        except Exception as e:
-            logger.error(f"Ошибка получения статистики команды: {e}")
-            bot.reply_to(message, "❌ Ошибка при получении статистики команды")
-
     @bot.message_handler(commands=['leaders'])
     def leaders_command(message):
         """Команда просмотра многостраничного лидерборда команды"""
@@ -271,29 +210,8 @@ def register_user_handlers(bot, chess_bot):
         register_command(message)
 
     @bot.message_handler(func=lambda message: message.text == "👤 Мой профиль")
-    def profile_button_with_pages(message):
-        """Обработчик кнопки профиля с выбором начальной страницы"""
-        user_id = message.from_user.id
-        username = chess_bot.file_storage.get_user_from_file(user_id)
-
-        if not username:
-            bot.reply_to(message, "❌ Вы не зарегистрированы. Используйте /register для регистрации.")
-            return
-
-        # Создаем быстрое меню выбора страницы
-        markup = types.InlineKeyboardMarkup()
-        markup.add(
-            types.InlineKeyboardButton("📊 Рейтинги", callback_data=f"profile_page_1_{username}"),
-            types.InlineKeyboardButton("🎮 Игры", callback_data=f"profile_page_2_{username}"),
-            types.InlineKeyboardButton("🏆 Турниры", callback_data=f"profile_page_3_{username}")
-        )
-
-        bot.reply_to(
-            message,
-            f"👤 **Профиль {username}**\n\nВыберите раздел для просмотра:",
-            parse_mode='Markdown',
-            reply_markup=markup
-        )
+    def profile_button(message):
+        profile_command(message)
 
     @bot.message_handler(func=lambda msg: msg.text == "🚪 Выйти из аккаунта")
     def logout_button(message):
