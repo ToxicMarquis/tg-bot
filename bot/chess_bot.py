@@ -80,7 +80,7 @@ class ChessBot:
             message = "❌ Неверный номер страницы"
             page = 1
 
-        keyboard = self.keyboards.get_profile_page_keyboard(page, username, user_id)
+        keyboard = self.keyboards.get_profile_page_keyboard(page, user_id)
         return message, keyboard
 
     
