@@ -89,7 +89,7 @@ def register_callback_handlers(bot, chess_bot):
                 return
 
             # Получаем данные страницы
-            profile_text, keyboard = chess_bot.show_profile_page(username, page)
+            profile_text, keyboard = chess_bot.show_profile_page(user_id, username, page)
 
             # Обновляем сообщение
             bot.edit_message_text(
