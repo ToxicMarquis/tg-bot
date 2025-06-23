@@ -74,7 +74,7 @@ def register_callback_handlers(bot, chess_bot):
             data_parts = call.data.split('_')
 
             page = int(data_parts[2])
-            user_id = '_'.join(data_parts[3:])  # На случай если в никнейме есть подчеркивания
+            user_id = int(data_parts[3])
 
             # Проверяем права доступа
             current_user_id = call.from_user.id
