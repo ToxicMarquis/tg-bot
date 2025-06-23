@@ -8,6 +8,12 @@ from config import Config
 
 logger = logging.getLogger(__name__)
 
+def escape_markdown_v2(text: str) -> str:
+    """Экранирование спецсимволов для MarkdownV2"""
+    if not text:
+        return ""
+    escape_chars = r'_*[]()~`>#+=|{}.!'
+    return re.sub(r'([{}])'.format(re.escape(escape_chars)), r'\\\1', str(text))
 
 class TournamentService:
     """Сервис для работы с турнирными данными"""
@@ -170,7 +176,7 @@ class TournamentService:
 
         if not tournament_stats:
             message = f"""
-    🏆 **{username}**
+    🏆 **{escape_markdown_v2(username)}**
 
     📋 **Турнирная статистика**
 
@@ -192,7 +198,7 @@ class TournamentService:
                 recent_text += f"Очки: {tournament.get('score', 'N/A')}\n"
 
         message = f"""
-    🏆 **{username}**
+    🏆 **{escape_markdown_v2(username)}**
 
     🏟️ **Турнирная статистика**
 
