@@ -52,7 +52,7 @@ class KeyboardManager:
             logger.error(f"Ошибка создания клавиатуры подтверждения: {e}")
             return None
 
-    def get_profile_page_keyboard(self, current_page: int, username: str):
+    def get_profile_page_keyboard(self, current_page: int, user_id: int):
         """Создание клавиатуры для навигации по страницам профиля"""
         markup = types.InlineKeyboardMarkup(row_width=3)
 
@@ -63,7 +63,7 @@ class KeyboardManager:
         if current_page > 1:
             buttons.append(types.InlineKeyboardButton(
                 "◀️", 
-                callback_data=f"profile_page_{current_page-1}_{username}"
+                callback_data=f"profile_page_{current_page-1}_{user_id}"
             ))
 
         # Индикатор текущей страницы
@@ -76,7 +76,7 @@ class KeyboardManager:
         if current_page < 3:
             buttons.append(types.InlineKeyboardButton(
                 "▶️", 
-                callback_data=f"profile_page_{current_page+1}_{username}"
+                callback_data=f"profile_page_{current_page+1}_{user_id}"
             ))
 
         markup.add(*buttons)
@@ -96,7 +96,7 @@ class KeyboardManager:
             else:
                 quick_nav.append(types.InlineKeyboardButton(
                     f"{page_icons[i-1]} {page_names[i-1]}", 
-                    callback_data=f"profile_page_{i}_{username}"
+                    callback_data=f"profile_page_{i}_{user_id}"
                 ))
 
         markup.add(*quick_nav)
