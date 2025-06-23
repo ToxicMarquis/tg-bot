@@ -73,18 +73,14 @@ def register_callback_handlers(bot, chess_bot):
             # Парсим данные из callback
             data_parts = call.data.split('_')
 
-            if len(data_parts) >= 4:
-                page = int(data_parts[2])
-                username = '_'.join(data_parts[3:])  # На случай если в никнейме есть подчеркивания
-            else:
-                page = 1
-                username = chess_bot.file_storage.get_user_from_file(call.from_user.id)
+            page = int(data_parts[2])
+            user_id = '_'.join(data_parts[3:])  # На случай если в никнейме есть подчеркивания
 
             # Проверяем права доступа
-            user_id = call.from_user.id
-            current_username = chess_bot.file_storage.get_user_from_file(user_id)
+            current_user_id = call.from_user.id
+            username = chess_bot.file_storage.get_user_from_file(user_id)
 
-            if current_username != username and not chess_bot.is_developer(user_id):
+            if current_user_id != user_id and not chess_bot.is_developer(user_id):
                 bot.answer_callback_query(call.id, "❌ Нет доступа к этому профилю")
                 return
 
