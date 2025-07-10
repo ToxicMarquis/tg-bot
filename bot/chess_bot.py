@@ -1,14 +1,17 @@
 import logging
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from config import Config
 from .services.file_storage import FileStorageService
 from .services.lichess_api import LichessAPIService
-from .services.user_service import UserService
 from .services.tournament_service import TournamentService
 from .utils.keyboards import KeyboardManager
 from .utils.formatters import MessageFormatter
-from .utils.validators import Validator
+
+# Импорт всех обработчиков
+from .handlers.base_handlers import register_base_handlers
+from .handlers.user_handlers import register_user_handlers
+from .handlers.dev_handlers import register_dev_handlers
+from .handlers.callback_handlers import register_callback_handlers
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +26,15 @@ class ChessBot:
 
             # Инициализация Telegram бота
             self.bot = telebot.TeleBot(Config.BOT_TOKEN)
-
+            
             # Инициализация сервисов
             self.file_storage = FileStorageService()
             self.lichess_api = LichessAPIService()
-            self.user_service = UserService()
             self.tournament_service = TournamentService()
 
             # Инициализация утилит
             self.keyboards = KeyboardManager()
             self.formatter = MessageFormatter()
-            self.validator = Validator()
 
             # Регистрация всех обработчиков
             self._register_all_handlers()
@@ -47,26 +48,10 @@ class ChessBot:
     def _register_all_handlers(self):
         """Регистрация всех обработчиков команд"""
         try:
-            # Команда /start
-            @self.bot.message_handler(commands=['start'])
-            def start_command(message):
-                self.handle_start(message)
-
-            # Команда /help
-            @self.bot.message_handler(commands=['help'])
-            def help_command(message):
-                self.handle_help(message)
-
-            # Команда /app
-            @self.bot.message_handler(commands=['app'])
-            def app_command(message):
-                self.handle_app(message)
-
-            # Команда /register (для разработчика)
-            @self.bot.message_handler(commands=['register'])
-            def register_command(message):
-                if message.from_user.id == Config.DEVELOPER_ID:
-                    self.handle_register(message)
+            register_base_handlers(self.bot, self)
+            register_user_handlers(self.bot, self)
+            register_dev_handlers(self.bot, self)
+            register_callback_handlers(self.bot, self)
 
             logger.info("Все обработчики команд зарегистрированы")
 
@@ -74,148 +59,31 @@ class ChessBot:
             logger.error(f"Ошибка регистрации обработчиков: {e}")
             raise
 
-    def handle_start(self, message):
-        """Обработчик команды /start"""
-        try:
-            welcome_text = """🏆 Добро пожаловать в Chess Tournament Bot! 
+    def show_profile_page(self, user_id: int, username: str, page: int = 1) -> tuple:
+        """Отображение определенной страницы профиля"""
+        # Загрузка данных
+        titles_data = self.file_storage.load_titles_from_file()
+        tournament_data = self.tournament_service.load_tournament_csv_data()
+        profile = self.lichess_api.get_lichess_profile(username)
 
-Этот бот создан для участников шахматных турниров и любителей шахмат.
+        if not profile:
+            return "❌ Не удалось получить данные профиля", None
 
-🎯 Основные возможности:
-• 📊 Просмотр профиля и статистики
-• 🏅 Система уровней и опыта
-• ♟️ Игра против ИИ (5 уровней сложности)
-• 🏆 Таблица лидеров
-• 🛍️ Магазин для кастомизации профиля
+        # Выбор страницы для отображения
+        if page == 1:
+            message = self.formatter.format_ratings_page(username, profile, titles_data)
+        elif page == 2:
+            message = self.formatter.format_games_page(username, profile)
+        elif page == 3:
+            message = self.tournament_service.format_tournaments_page(username, tournament_data)
+        else:
+            message = "❌ Неверный номер страницы"
+            page = 1
 
-📱 Для полного функционала используйте команду /app
+        keyboard = self.keyboards.get_profile_page_keyboard(page, user_id)
+        return message, keyboard
 
-❓ Нужна помощь? Используйте /help"""
-
-            self.bot.send_message(message.chat.id, welcome_text)
-
-        except Exception as e:
-            logger.error(f"Ошибка в handle_start: {e}")
-            self.bot.send_message(message.chat.id, "Произошла ошибка при обработке команды.")
-
-    def handle_help(self, message):
-        """Обработчик команды /help"""
-        try:
-            help_text = """📚 Справка по Chess Tournament Bot
-
-🎮 Основные команды:
-• /start - Приветственное сообщение
-• /help - Эта справка
-• /app - Открыть приложение
-
-🔐 Регистрация для новых пользователей:
-Если вы не зарегистрированы в системе, для доступа к приложению необходимо:
-
-1. Добавить в описание вашего Telegram-аккаунта слово "univerify"
-2. Нажать кнопку "Войти в приложение"
-3. Система автоматически проверит ваш аккаунт
-4. После успешной проверки вы получите доступ к приложению
-
-⚠️ Важно: 
-• Используйте только латинские буквы и цифры в никнейме
-• Никнейм должен содержать от 3 до 20 символов
-• Запрещены специальные символы и SQL-элементы
-
-🎯 Возможности приложения:
-• Просмотр профиля с рейтингами Lichess
-• Система уровней (опыт рассчитывается по формуле: Очки × 10 + Посещаемость × 25 + Средний перформанс ÷ 100)
-• Шахматный симулятор с 5 уровнями сложности
-• Магазин для кастомизации профиля
-• Таблица лидеров
-
-💰 Система монет:
-• Получайте монеты за победы над ИИ
-• Покупайте кастомизацию профиля
-• Открывайте новые возможности с повышением уровня
-
-🎨 Кастомизация:
-• 1 уровень: собственные обои (50 монет)
-• 3 уровень: собственный аватар (100 монет)  
-• 5 уровень: собственный баннер (200 монет)
-• 6+ уровень: эффекты для аватара и профиля
-
-Удачи в турнирах! ♟️"""
-
-            self.bot.send_message(message.chat.id, help_text)
-
-        except Exception as e:
-            logger.error(f"Ошибка в handle_help: {e}")
-            self.bot.send_message(message.chat.id, "Произошла ошибка при обработке команды.")
-
-    def handle_app(self, message):
-        """Обработчик команды /app"""
-        try:
-            username = message.from_user.username
-            user_id = message.from_user.id
-
-            if not username:
-                self.bot.send_message(message.chat.id, 
-                    "❌ Для использования приложения необходимо установить username в Telegram.")
-                return
-
-            # Проверяем, есть ли пользователь в базе
-            if self.user_service.user_exists(username):
-                # Пользователь существует, открываем приложение
-                keyboard = InlineKeyboardMarkup()
-                webapp_button = InlineKeyboardButton(
-                    "🎮 Открыть приложение", 
-                    web_app=WebAppInfo(url=f"{Config.WEB_APP_URL}?user={username}")
-                )
-                keyboard.add(webapp_button)
-
-                self.bot.send_message(
-                    message.chat.id, 
-                    f"🎯 Добро пожаловать, {username}!\n\n" +
-                    "Нажмите кнопку ниже, чтобы открыть приложение:",
-                    reply_markup=keyboard
-                )
-            else:
-                # Новый пользователь, нужна регистрация
-                keyboard = InlineKeyboardMarkup()
-                register_button = InlineKeyboardButton(
-                    "📝 Зарегистрироваться", 
-                    web_app=WebAppInfo(url=f"{Config.WEB_APP_URL}?register={username}")
-                )
-                keyboard.add(register_button)
-
-                self.bot.send_message(
-                    message.chat.id, 
-                    f"👋 Добро пожаловать, {username}!\n\n" +
-                    "🔐 Для регистрации выполните следующие шаги:\n" +
-                    "1. Добавьте слово 'univerify' в описание вашего аккаунта\n" +
-                    "2. Нажмите кнопку 'Зарегистрироваться'\n" +
-                    "3. Дождитесь подтверждения\n\n" +
-                    "После успешной регистрации вы получите доступ ко всем функциям!",
-                    reply_markup=keyboard
-                )
-
-        except Exception as e:
-            logger.error(f"Ошибка в handle_app: {e}")
-            self.bot.send_message(message.chat.id, "Произошла ошибка при обработке команды.")
-
-    def handle_register(self, message):
-        """Обработчик команды /register (только для разработчика)"""
-        try:
-            if len(message.text.split()) < 2:
-                self.bot.send_message(message.chat.id, "Использование: /register <username>")
-                return
-
-            username = message.text.split()[1]
-
-            if self.user_service.register_user(username):
-                self.bot.send_message(message.chat.id, f"✅ Пользователь {username} успешно зарегистрирован!")
-            else:
-                self.bot.send_message(message.chat.id, f"❌ Ошибка при регистрации пользователя {username}")
-
-        except Exception as e:
-            logger.error(f"Ошибка в handle_register: {e}")
-            self.bot.send_message(message.chat.id, "Произошла ошибка при обработке команды.")
-
+    
     def is_developer(self, user_id: int) -> bool:
         """Проверка прав разработчика"""
         return user_id == Config.DEVELOPER_ID
