@@ -1,9 +1,9 @@
 import logging
 import asyncio
+import os
 from bot.chess_bot import ChessBot
 from config import Config
 from keep_alive import keep_alive
-import os
 
 def setup_logging():
     """Настройка системы логирования"""
@@ -23,6 +23,7 @@ def main():
         os.makedirs('logs', exist_ok=True)
         os.makedirs('data', exist_ok=True)
         os.makedirs('tournaments', exist_ok=True)
+        os.makedirs('webapp/static', exist_ok=True)
 
         # Настройка логирования
         setup_logging()
