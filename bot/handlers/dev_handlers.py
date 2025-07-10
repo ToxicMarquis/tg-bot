@@ -77,6 +77,7 @@ def register_dev_handlers(bot, chess_bot):
             bot.send_message(
                 target_user_id,
                 f"📢 **Сообщение от администратора:**\n\n{message_text}",
+                disable_web_page_preview=True,
                 parse_mode='Markdown'
             )
 
@@ -124,6 +125,7 @@ def register_dev_handlers(bot, chess_bot):
             bot.send_message(
                 target_user_id,
                 f"📢 **Сообщение от администратора:**\n\n{message_text}",
+                disable_web_page_preview=True,
                 parse_mode='Markdown'
             )
 
@@ -226,7 +228,7 @@ def register_dev_handlers(bot, chess_bot):
                     processed_count += 1
 
                     # Формируем сообщение для пользователя
-                    user_message = f"""📢 **Сообщение от администрации**
+                    user_message = f"""📢 **Сообщение от администрации:**
 
     {safe_broadcast_text}
 
@@ -237,6 +239,7 @@ def register_dev_handlers(bot, chess_bot):
                     bot_instance.send_message(
                         user_id,
                         user_message,
+                        disable_web_page_preview=True,
                         parse_mode='Markdown'
                     )
 
