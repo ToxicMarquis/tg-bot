@@ -1,46 +1,71 @@
+from __future__ import annotations
 import os
+from dataclasses import dataclass
 from dotenv import load_dotenv
 
-# Загрузка переменных окружения
 load_dotenv()
 
+
+class ConfigError(RuntimeError):
+    pass
+
+
+@dataclass(frozen=True)
 class Config:
-    """Центральная конфигурация приложения"""
+    bot_token: str
+    admin_ids: tuple[int, ...]
+    timezone: str
+    api_base_url: str | None
+    db_path: str
 
-    # Токены API
-    BOT_TOKEN = os.environ.get('BOT_TOKEN')
-    LICHESS_TOKEN = os.environ.get('LICHESS_TOKEN')
 
-    # ID разработчика
-    DEVELOPER_ID = 1834341648
+def _parse_admin_ids(raw: str) -> tuple[int, ...]:
+    admin_ids = []
+    for chunk in raw.replace(";", ",").split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        try:
+            admin_ids.append(int(chunk))
+        except ValueError as error:
+            raise ConfigError(
+                f"ADMIN_ID содержит некорректное значение: {chunk!r}. "
+                "Ожидается числовой Telegram ID (можно несколько через запятую)."
+            ) from error
+    return tuple(admin_ids)
 
-    # Настройки файлового хранилища
-    USERS_FILE = '/data/users.txt'
-    ACTIVITY_FILE = '/data/activity.txt'
-    TITLES_FILE = '/data/titles.json'
-    TOURNAMENTS_DIR = 'tournaments/'
 
-    # Настройки веб-сервера для UptimeRobot
-    WEB_SERVER_HOST = '0.0.0.0'
-    WEB_SERVER_PORT = 8080
+def _parse_api_base_url(raw: str) -> str | None:
+    url = raw.strip().rstrip("/")
+    if not url:
+        return None
+    if not url.startswith(("http://", "https://")):
+        raise ConfigError(
+            f"TELEGRAM_API_URL должен начинаться с http:// или https://, получено: {raw!r}"
+        )
+    return url
 
-    # Настройки логирования
-    LOG_LEVEL = 'INFO'
-    LOG_FILE = 'logs/bot.log'
 
-    # Лимиты API
-    LICHESS_API_DELAY = 1.0  # секунд между запросами
-
-    # Настройки сообщений
-    MAX_MESSAGE_LENGTH = 4000
-
-    @classmethod
-    def validate(cls):
-        """Валидация конфигурации"""
-        required_vars = ['BOT_TOKEN', 'LICHESS_TOKEN']
-        missing_vars = [var for var in required_vars if not getattr(cls, var)]
-
-        if missing_vars:
-            raise ValueError(f"Отсутствуют переменные окружения: {', '.join(missing_vars)}")
-
-        return True
+def load_config() -> Config:
+    bot_token = os.getenv("BOT_TOKEN", "").strip()
+    if not bot_token:
+        raise ConfigError(
+            "Не задан BOT_TOKEN. Скопируйте .env.example в .env "
+            "и укажите токен, полученный у @BotFather."
+        )
+    admin_ids = _parse_admin_ids(os.getenv("ADMIN_ID", ""))
+    if not admin_ids:
+        raise ConfigError(
+            "Не задан ADMIN_ID. Укажите Telegram ID администратора, "
+            "которому будут приходить заявки (узнать можно у @userinfobot)."
+        )
+    timezone = os.getenv("TIMEZONE", "Europe/Moscow").strip() or "Europe/Moscow"
+    api_base_url = _parse_api_base_url(os.getenv("TELEGRAM_API_URL", ""))
+    db_path = os.getenv("DB_PATH", "bot.db").strip() or "bot.db"
+    return Config(
+        bot_token=bot_token,
+        admin_ids=admin_ids,
+        timezone=timezone,
+        api_base_url=api_base_url,
+        db_path=db_path,
+    )
